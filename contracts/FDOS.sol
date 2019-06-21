@@ -3,10 +3,12 @@ pragma solidity ^0.4.24;
 import "./SafeMath.sol";
 
 contract FDOS {
-    
+    using SafeMath for uint256;
+
     mapping (address => uint256) public serialNumber;
     mapping (uint256 => address) public addressOfEatery;
 
+    mapping (uint256 => string) public eateryName;
     mapping (uint256 => string) public area1;
     mapping (uint256 => string) public area2;
     mapping (uint256 => string) public area3;
@@ -17,33 +19,36 @@ contract FDOS {
     mapping (uint256 => mapping (uint8 => uint32)) public menuCharge;
     mapping (uint256 => bool) public open;
 
+    mapping (uint256 => uint256) public orderNumber;
+    mapping (uint256 => mapping(uint256 => uint8)) public orderMenu;
+    mapping (uint256 => mapping(uint256 => string)) public orderArea1;
+    mapping (uint256 => mapping(uint256 => string)) public orderArea2;
+    mapping (uint256 => mapping(uint256 => string)) public orderArea3;
+    mapping (uint256 => mapping(uint256 => string)) public orderArea4;
+
     address public owner;
     uint256 public numberOfEatery;
-
-    struct menuSet{
-        string menuName;
-        uint32 menuCharge;
-    }
-
-
-
+    uint256 public balance;
 
     constructor () public{
         owner = msg.sender;
-        numberOfEatery = 1;
+        numberOfEatery = 0;
     }
 
-    function registerEatery (string _area1, string _area2, string _area3, string _area4) public returns (bool success){
+    function registerEatery (string _name, string _area1, string _area2, string _area3, string _area4) public returns (bool success){
         serialNumber[msg.sender] = numberOfEatery;
         addressOfEatery[numberOfEatery] = msg.sender;
 
+
+        orderNumber[numberOfEatery] = 0;
+        eateryName[numberOfEatery] = _name;
         area1[numberOfEatery] = _area1;
         area2[numberOfEatery] = _area2;
         area3[numberOfEatery] = _area3;
         area4[numberOfEatery] = _area4;
 
         menuNum[numberOfEatery] = 0;
-        numberOfEatery = SafeMath.add(numberOfEatery , 1);
+        numberOfEatery = numberOfEatery.add(1);
         return true;
     }
     
@@ -71,9 +76,9 @@ contract FDOS {
     function showEatery(string _area3, string _area4) public view returns(uint256[] serial){
         require(numberOfEatery > 0);
         uint256[] memory serials;
-        uint256 n = 1;
+        uint256 n = 0;
         uint256 present = 0;
-        while( n <= numberOfEatery ){
+        while( n < numberOfEatery ){
             if(keccak256(area3[n]) == keccak256(_area3)  && keccak256(area4[n]) == keccak256(_area4)){
                 serials[present] = serialNumber[addressOfEatery[n]];
                 present += 1;
@@ -88,14 +93,17 @@ contract FDOS {
 
         uint256 totalCharge = 0;
         for(uint i = 0; i < _menus.length; i++){
-            totalCharge = SafeMath.add(totalCharge, menuCharge[_serial][_menus[i]]);
+            totalCharge =totalCharge.add(menuCharge[_serial][_menus[i]]);
         }
 
-        if( totalCharge > msg.value){   // not enough value!
+        if( totalCharge != msg.value){   // not equal value!
             return false;
         }
+
+        addressOfEatery[_serial].transfer(msg.value);
         return true;
     }
+    
 
 /*
     function showMenus(uint256 _serial) public returns(menuSet[] a){
@@ -107,6 +115,11 @@ contract FDOS {
         return menuSets;
     }
 */
+
+    function addOrderNumber() public returns(bool){
+        orderNumber[serialNumber[msg.sender]] = orderNumber[serialNumber[msg.sender]].add(1);
+        return true;
+    }
 
     function getMenuNum(uint256 _serial) public view returns(uint8){
         return menuNum[_serial];
