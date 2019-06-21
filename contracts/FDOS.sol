@@ -12,7 +12,6 @@ contract FDOS {
     mapping (uint256 => string) public area1;
     mapping (uint256 => string) public area2;
     mapping (uint256 => string) public area3;
-    mapping (uint256 => string) public area4;
 
     mapping (uint256 => uint8) public menuNum;
     mapping (uint256 => mapping (uint8 => string)) public menuName;
@@ -24,7 +23,6 @@ contract FDOS {
     mapping (uint256 => mapping(uint256 => string)) public orderArea1;
     mapping (uint256 => mapping(uint256 => string)) public orderArea2;
     mapping (uint256 => mapping(uint256 => string)) public orderArea3;
-    mapping (uint256 => mapping(uint256 => string)) public orderArea4;
 
     address public owner;
     uint256 public numberOfEatery;
@@ -35,7 +33,7 @@ contract FDOS {
         numberOfEatery = 0;
     }
 
-    function registerEatery (string _name, string _area1, string _area2, string _area3, string _area4) public returns (bool success){
+    function registerEatery (string _name, string _area1, string _area2, string _area3) public returns (bool success){
         serialNumber[msg.sender] = numberOfEatery;
         addressOfEatery[numberOfEatery] = msg.sender;
 
@@ -45,7 +43,6 @@ contract FDOS {
         area1[numberOfEatery] = _area1;
         area2[numberOfEatery] = _area2;
         area3[numberOfEatery] = _area3;
-        area4[numberOfEatery] = _area4;
 
         menuNum[numberOfEatery] = 0;
         numberOfEatery = numberOfEatery.add(1);
@@ -73,13 +70,13 @@ contract FDOS {
         open[serialNumber[msg.sender]] = false;
     }
 
-    function showEatery(string _area3, string _area4) public view returns(uint256[] serial){
+    function showEatery(string _area2, string _area3) public view returns(uint256[] serial){
         require(numberOfEatery > 0);
         uint256[] memory serials;
         uint256 n = 0;
         uint256 present = 0;
         while( n < numberOfEatery ){
-            if(keccak256(area3[n]) == keccak256(_area3)  && keccak256(area4[n]) == keccak256(_area4)){
+            if(keccak256(area2[n]) == keccak256(_area2)  && keccak256(area3[n]) == keccak256(_area3)){
                 serials[present] = serialNumber[addressOfEatery[n]];
                 present += 1;
             }
@@ -119,6 +116,10 @@ contract FDOS {
     function addOrderNumber() public returns(bool){
         orderNumber[serialNumber[msg.sender]] = orderNumber[serialNumber[msg.sender]].add(1);
         return true;
+    }
+
+    function getEateryName(uint256 _serial) public returns(string){
+        return eateryName[_serial];
     }
 
     function getMenuNum(uint256 _serial) public view returns(uint8){
