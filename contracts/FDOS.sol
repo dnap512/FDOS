@@ -18,11 +18,7 @@ contract FDOS {
     mapping (uint256 => mapping (uint8 => uint32)) public menuCharge;
     mapping (uint256 => bool) public open;
 
-    mapping (uint256 => uint256) public orderNumber;
-    mapping (uint256 => mapping(uint256 => uint8)) public orderMenu;
-    mapping (uint256 => mapping(uint256 => string)) public orderArea1;
-    mapping (uint256 => mapping(uint256 => string)) public orderArea2;
-    mapping (uint256 => mapping(uint256 => string)) public orderArea3;
+    event Order(uint256 _serial, uint8[] _orderMenus, string _orderArea1, string _orderArea2, string _orderArea3);
 
     address public owner;
     uint256 public numberOfEatery;
@@ -37,8 +33,6 @@ contract FDOS {
         serialNumber[msg.sender] = numberOfEatery;
         addressOfEatery[numberOfEatery] = msg.sender;
 
-
-        orderNumber[numberOfEatery] = 0;
         eateryName[numberOfEatery] = _name;
         area1[numberOfEatery] = _area1;
         area2[numberOfEatery] = _area2;
@@ -85,38 +79,28 @@ contract FDOS {
         return serials;
     }
 
-    function order(uint256 _serial, uint8[] _menus) public payable returns (bool){
+    function order(uint256 _serial, uint8[] _orderMenus, string _orderArea1, string _orderArea2, string _orderArea3) public payable returns (bool){
         require(open[_serial] == true && msg.value > 0);
 
         uint256 totalCharge = 0;
-        for(uint i = 0; i < _menus.length; i++){
-            totalCharge =totalCharge.add(menuCharge[_serial][_menus[i]]);
+        for(uint i = 0; i < _orderMenus.length; i++){
+            totalCharge =totalCharge.add(menuCharge[_serial][_orderMenus[i]]);
         }
 
         if( totalCharge != msg.value){   // not equal value!
+            msg.sender.transfer(msg.value);
             return false;
         }
-
+        emit Order(_serial, _orderMenus,  _orderArea1, _orderArea2, _orderArea3);
         addressOfEatery[_serial].transfer(msg.value);
         return true;
     }
-    
-
-/*
-    function showMenus(uint256 _serial) public returns(menuSet[] a){
-        menuSet[] memory menuSets;
-        for(uint8 i = 1; i <= menuNum[_serial]; i++){
-            menuSets[i-1].menuName = menuName[_serial][i];
-            menuSets[i-1].menuCharge = menuCharge[_serial][i];
-        }
-        return menuSets;
-    }
-*/
-
+    /*
     function addOrderNumber() public returns(bool){
         orderNumber[serialNumber[msg.sender]] = orderNumber[serialNumber[msg.sender]].add(1);
         return true;
     }
+    */
 
     function getEateryName(uint256 _serial) public returns(string){
         return eateryName[_serial];
