@@ -156,7 +156,6 @@ const App = {
   order: async function () {
     alert("주문이 완료되었습니다. 조금만 기다려주세요.");
     $('#restaurant').hide();
-    $('#restaurant1').hide();
   },
 
   getList: async function () {
