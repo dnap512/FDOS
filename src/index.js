@@ -71,10 +71,6 @@ const App = {
     location.reload();
   },
 
-  submitAnswer: async function () {
-
-  },
-
   deposit: async function () {
     var spinner = this.showSpinner();
     // contract의 인스턴스를 만들어 접근.
@@ -113,14 +109,8 @@ const App = {
     var area1 = $('#area1').val();
     var area2 = $('#area2').val();
     var area3 = $('#area3').val();
-    var area4 = $('#area4').val();
-    document.getElementById("rName").textContent="";
-    document.getElementById("area1").textContent="";
-    document.getElementById("area2").textContent="";
-    document.getElementById("area3").textContent="";
-    document.getElementById("area4").textContent="";
     agContract.methods.openEatery().call();
-    if(!agContract.methods.registerEatery(name, area1, area2, area3, area4)){
+    if(!agContract.methods.registerEatery(name, area1, area2, area3)){
       return;
     }
 
@@ -133,13 +123,44 @@ const App = {
     var menuCharge = $('#mCharge').val();
     agContract.methods.addMenu(menuName, menuCharge);
     alert("메뉴 추가 성공!");
-    $('#mName').value="";
-    document.getElementById("mCharge").textContent="";
   },
 
   registerComplete: async function () {
     $('#registry1').show();
     $('#menuRegistry').hide();
+    alert("등록 성공!");
+  },
+
+  //setMenu: async function () {
+  //  var List[] = agContract.methods.
+  //},
+
+  orderRegistry: async function () {
+    var _area2 = $('#o_area2').val();
+    var _area3 = $('#o_area3').val();
+    var eateryList = agContract.methods.showEatery(_area2, _area3).call().then(console.log);
+    for(var i in eateryList){
+      var serialNum = eateryList[i];
+      $('#name').append('&nbsp' + agContract.methods.getEateryName(serialNum).call());
+      var menuNum = agContract.methods.getMenuNum(serialNum);
+      for(var j = 1; j <= menuNum; j++){
+        $('#menu_' + stringify(j)).append('&nbsp' + agContract.methods.getMenuName(serialNum, j).call());
+        $('#menucharge' + stringify(j)).append('&nbsp' + agContract.methods.getMenuCharge(serialNum, j).call());
+      }
+    }
+    $('#orderStep').hide();
+    $('#restaurantList').show();
+    $('#restaurant').show();
+  },
+
+  order: async function () {
+    alert("주문이 완료되었습니다. 조금만 기다려주세요.");
+    $('#restaurant').hide();
+    $('#restaurant1').hide();
+  },
+
+  getList: async function () {
+    
   },
 
   callOwner: async function () {
@@ -192,16 +213,6 @@ const App = {
     // logout버튼을 보여줌.
     $('#logout').show();
     $('#step').show();
-    
-    // $('#game').show();
-    // // 계정 주소를 보여줌.
-    // $('#address').append('<br>' + '<p>' + '내 계정 주소: ' + walletInstance.address + '</p>');
-    // $('#contractBalance')
-    // .append('<p>' + '이벤트 잔액: ' + cav.utils.fromPeb(await this.callContractBalance(), "KLAY") + 'KLAY' + '</p>');
-
-    // if (await this.callOwner() == walletInstance.address) {
-    //   $('#owner').show();
-    // }
   },
 
   eateryUI: async function () { // 식당 주인 UI
@@ -209,14 +220,10 @@ const App = {
     const walletInstance = cav.klay.accounts.privateKeyToAccount(privateKey);
     // modal을 닫음.
     $('#loginModal').modal('hide');
-    // 주문하기, 식당등록 숨김.
-    //$('#step').hide();
     // logout버튼을 보여줌.
     $('#logout').show();
-
     // 계정 주소를 보여줌.
     $('#address').append('<br>' + '<p>' + '내 계정 주소: ' + walletInstance.address + '</p>');
-
     // 식당 등록 UI show()
     $('#restaurantRegister').show();
   },
@@ -227,15 +234,16 @@ const App = {
     // modal을 닫음.
     $('#loginModal').modal('hide');
     // 주문자 로그인, 식당 로그인 숨김.
-
     // logout버튼을 보여줌.
     $('#logout').show();
     // 계정 주소를 보여줌.
     $('#address').append('<br>' + '<p>' + '내 계정 주소: ' + walletInstance.address + '</p>');
-
+    $('#orderStep').show();
     // 식당 리스트를 보여주는 UI. 식당 누르면 메뉴 리스트.
-    $('#restaurantList').show();
+    document.getElementById('')
   },
+
+
 
   removeWallet: function () {
     cav.klay.accounts.wallet.clear();
