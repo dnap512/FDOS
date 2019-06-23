@@ -71,38 +71,6 @@ const App = {
     location.reload();
   },
 
-  deposit: async function () {
-    var spinner = this.showSpinner();
-    // contract의 인스턴스를 만들어 접근.
-    const walletInstance = this.getWallet();
-    if (walletInstance) {
-      // Owner만 컨트랙에 송금할 수 있게 함.
-      if (await this.callOwner() !== walletInstance.address) return;
-      else {
-        var amount = $('#amount').val();
-        if (amount) {
-          agContract.methods.deposit().send({
-            from: walletInstance.address,
-            gas: '250000',
-            value: cav.utils.toPeb(amount, "KLAY")
-          })
-          .once('transactionHash', (txHash) => {
-            console.log(`txHash: ${txHash}`);
-          })
-          .once('receipt', (receipt) => {
-            console.log(`(#${receipt.blockNumber})`, receipt);
-            spinner.stop();
-            alert(amount + " KLAY를 컨트랙에 송금하였습니다.");
-            location.reload();
-          })
-          .once('error', (error) => {
-            alert(error.message);
-          });
-        }
-        return;
-      }
-    }
-  },
 
   registerEatery: async function () {
     var name = $('#rName').val();
